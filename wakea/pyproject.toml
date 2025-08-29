@@ -10,6 +10,7 @@ dependencies = [
   "numpy>=1.24",
   # Optional at runtime; install manually as needed
   "torch>=2.1; platform_system != 'Darwin' or python_version >= '3.10'",
+  "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -19,6 +20,10 @@ rag = [
 server = [
   "uvicorn>=0.23",
   "fastapi>=0.110",
+]
+tokenizers = [
+  "transformers>=4.40",
+  "sentencepiece>=0.1.99",
 ]
 
 [build-system]

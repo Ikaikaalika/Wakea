@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Optional, Any
 
 
 SPECIAL_TOKENS = ["<pad>", "<bos>", "<eos>", "<unk>"]
@@ -74,3 +74,54 @@ class SimpleTokenizer:
             toks.append(tok)
         return " ".join(toks)
 
+
+class HFTokenizerWrapper:
+    """Thin wrapper over Hugging Face tokenizers if available.
+
+    Use with `pretrained` model name. Falls back to basic tokenization when unavailable.
+    """
+
+    def __init__(self, pretrained: str):
+        from transformers import AutoTokenizer  # type: ignore
+
+        self.tok = AutoTokenizer.from_pretrained(pretrained)
+        if self.tok.pad_token is None:
+            self.tok.pad_token = self.tok.eos_token or "<pad>"
+
+    @property
+    def pad_id(self) -> int:
+        return int(self.tok.pad_token_id)
+
+    @property
+    def bos_id(self) -> int:
+        return int(self.tok.bos_token_id or self.tok.cls_token_id or self.pad_id)
+
+    @property
+    def eos_id(self) -> int:
+        return int(self.tok.eos_token_id or self.tok.sep_token_id or self.pad_id)
+
+    def build_from_corpus(self, *_args: Any, **_kwargs: Any) -> None:  # no-op
+        return None
+
+    def encode(self, text: str, add_special: bool = True) -> List[int]:
+        return list(self.tok.encode(text, add_special_tokens=add_special))
+
+    def decode(self, ids: List[int], skip_special: bool = True) -> str:
+        return str(self.tok.decode(ids, skip_special_tokens=skip_special))
+
+
+def get_text_tokenizer(pretrained: Optional[str] = None):
+    """Return a tokenizer.
+
+    - If `pretrained` is provided and transformers is available → HF tokenizer
+    - Else → SimpleTokenizer
+    """
+    if pretrained:
+        try:
+            # Delay import to avoid hard dependency
+            import transformers  # type: ignore  # noqa: F401
+
+            return HFTokenizerWrapper(pretrained)
+        except Exception:
+            pass
+    return SimpleTokenizer()

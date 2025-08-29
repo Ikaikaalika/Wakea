@@ -38,3 +38,19 @@ class InMemoryRetriever:
         docs: List[Doc] = self.index.search(q, top_k=top_k)
         return [RetrievedDoc(text=d.text, score=float((d.vec @ q))) for d in docs]
 
+    def save(self, path: str) -> int:
+        import pickle
+
+        with open(path, "wb") as f:
+            pickle.dump(self.index, f)
+        return len(self.index.docs)
+
+    @classmethod
+    def load(cls, path: str) -> "InMemoryRetriever":
+        import pickle
+
+        with open(path, "rb") as f:
+            index = pickle.load(f)
+        r = cls(dim=index.dim)
+        r.index = index
+        return r

@@ -4,3 +4,10 @@ lr: 3.0e-4
 max_steps: 10
 use_rfs: false
 
+data:
+  path: wakea/data/schemas/sft_dialogue.jsonl
+  tokenizer: null  # e.g., 'gpt2' if transformers installed
+  max_len: 256
+
+model_cfg: wakea/configs/model.yaml
+output_dir: checkpoints/sft
