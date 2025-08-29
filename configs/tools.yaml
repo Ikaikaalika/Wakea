@@ -4,3 +4,11 @@ tools:
   - code
   - web
 
+web_config:
+  provider: serpapi  # options: serpapi, tavily
+  api_key_env: SERPAPI_API_KEY
+  top_k: 5
+  timeout_s: 8
+  # For tavily you can set provider: tavily and api_key_env: TAVILY_API_KEY
+  # Optionally override endpoint if using a self-hosted gateway
+  endpoint: null

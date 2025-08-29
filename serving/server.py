@@ -27,6 +27,7 @@ def parse_args(argv=None):
     ap.add_argument("--model-cfg", type=str, help="YAML path for model config", default=None)
     ap.add_argument("--tokenizer", type=str, help="HF tokenizer name (optional)", default=None)
     ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--tools-cfg", type=str, help="Path to tools.yaml", default="configs/tools.yaml")
     return ap.parse_args(argv)
 
 
@@ -59,7 +60,7 @@ def handle_prompt(prompt: str, router: ToolRouter, model=None, tok=None, tempera
 
 def main(argv=None):
     args = parse_args(argv)
-    router = ToolRouter.default()
+    router = ToolRouter.from_config(args.tools_cfg)
     model = None
     tok = None
     if args.load_index:
