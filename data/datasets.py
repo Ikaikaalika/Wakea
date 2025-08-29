@@ -12,7 +12,7 @@ except Exception:  # pragma: no cover
     torch = None  # type: ignore
     Dataset = object  # type: ignore
 
-from ..modeling.tokenizer import get_text_tokenizer
+from modeling.tokenizer import get_text_tokenizer
 
 
 def _read_jsonl(path: str) -> List[Dict[str, Any]]:

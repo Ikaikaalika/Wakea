@@ -14,39 +14,39 @@ This repo is a scaffold to accelerate research and prototyping.
 
 1) Explore the demo router and tools
 ```
-python -m wakea.serving.server --help
-python -m wakea.serving.server --prompt "What is 23*19? Use tool:calculator"
+python -m serving.server --help
+python -m serving.server --prompt "What is 23*19? Use tool:calculator"
 ```
 
 2) Try RAG (in-memory toy index)
 ```
-python -m wakea.scripts.build_index --docs wakea/examples/docs.txt
-python -m wakea.serving.server --prompt "RAG: Tell me about Wakea."
+python -m scripts.build_index --docs examples/docs.txt
+python -m serving.server --prompt "RAG: Tell me about Wakea."
 ```
 
 3) Train (SFT) and load for generation
 ```
-python -m wakea.scripts.train_sft --config wakea/configs/train_sft.yaml
-python -m wakea.serving.server --ckpt checkpoints/sft/model.pt --model-cfg wakea/configs/model.yaml --prompt "Hello Wakea"
+python -m scripts.train_sft --config configs/train_sft.yaml
+python -m serving.server --ckpt checkpoints/sft/model.pt --model-cfg configs/model.yaml --prompt "Hello Wakea"
 ```
 
 4) Build or load RAG index
 ```
-python -m wakea.scripts.build_index --docs wakea/examples/docs.txt --out checkpoints/rag.pkl
-python -m wakea.scripts.build_index --load checkpoints/rag.pkl
+python -m scripts.build_index --docs examples/docs.txt --out checkpoints/rag.pkl
+python -m scripts.build_index --load checkpoints/rag.pkl
 ```
 
 5) Train tool-use head (web, rag, calculator, code)
 ```
-python -m wakea.scripts.train_sft --config wakea/configs/train_sft.yaml
+python -m scripts.train_sft --config configs/train_sft.yaml
 # Config enables joint LM + tool classification via tool_data + tool_loss_weight
 ```
 
-See configs under `wakea/configs/` and scripts under `wakea/scripts/`.
+See configs under `configs/` and scripts under `scripts/`.
 
 ## Training Notes
-- SFT: JSONL `wakea/data/schemas/sft_dialogue.jsonl` demonstrates the expected chat format.
-- DPO: JSONL `wakea/data/schemas/pref_pairs.jsonl` demonstrates prompt/choice pairs.
+- SFT: JSONL `data/schemas/sft_dialogue.jsonl` demonstrates the expected chat format.
+- DPO: JSONL `data/schemas/pref_pairs.jsonl` demonstrates prompt/choice pairs.
 - Replace the SimpleTokenizer with a Hugging Face tokenizer by setting `data.tokenizer` in the config (e.g., `gpt2`) and installing the `tokenizers` extra.
 - Checkpoints are saved with `torch.save` and can be loaded by the server CLI for quick generation tests.
 

@@ -5,9 +5,9 @@ max_steps: 10
 beta: 0.1
 
 data:
-  path: wakea/data/schemas/pref_pairs.jsonl
+  path: data/schemas/pref_pairs.jsonl
   tokenizer: null
   max_len: 256
 
-model_cfg: wakea/configs/model.yaml
+model_cfg: configs/model.yaml
 output_dir: checkouts/dpo

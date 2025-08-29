@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from ..rag.api import build_index_from_file, load_index
+from rag.api import build_index_from_file, load_index
 
 
 def main(argv=None):

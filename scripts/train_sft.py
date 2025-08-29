@@ -10,12 +10,12 @@ try:
 except Exception as e:  # pragma: no cover
     torch = None  # type: ignore
 
-from ..utils.config import load_yaml
-from ..utils.logging import setup_logging
-from ..utils.seed import seed_everything
-from ..utils.checkpoint import save_checkpoint
-from ..data.datasets import SFTDataset, SFTCollator, ToolUseDataset, ToolCollator
-from ..modeling.wakea_lm import build_model_from_cfg
+from utils.config import load_yaml
+from utils.logging import setup_logging
+from utils.seed import seed_everything
+from utils.checkpoint import save_checkpoint
+from data.datasets import SFTDataset, SFTCollator, ToolUseDataset, ToolCollator
+from modeling.wakea_lm import build_model_from_cfg
 
 
 def load_model_cfg(path: str) -> dict:
@@ -34,7 +34,7 @@ def main(argv=None):
         return
 
     # Tools
-    tool_cfg_path = cfg.get("tool_cfg", "wakea/configs/tools.yaml")
+    tool_cfg_path = cfg.get("tool_cfg", "configs/tools.yaml")
     tools_cfg = load_yaml(tool_cfg_path) if tool_cfg_path else {"tools": []}
     tool_names = list(tools_cfg.get("tools", []))
 
@@ -45,7 +45,7 @@ def main(argv=None):
 
     data_cfg = cfg.get("data", {})
     dset = SFTDataset(
-        path=data_cfg.get("path", "wakea/data/schemas/sft_dialogue.jsonl"),
+        path=data_cfg.get("path", "data/schemas/sft_dialogue.jsonl"),
         tokenizer_name=data_cfg.get("tokenizer"),
         max_len=int(data_cfg.get("max_len", 256)),
     )
@@ -62,7 +62,7 @@ def main(argv=None):
     tool_loss_weight = float(cfg.get("tool_loss_weight", 0.0))
     if tool_data_cfg and tool_names:
         tset = ToolUseDataset(
-            path=tool_data_cfg.get("path", "wakea/data/schemas/tool_use.jsonl"),
+            path=tool_data_cfg.get("path", "data/schemas/tool_use.jsonl"),
             tool_names=tool_names,
             tokenizer_name=tool_data_cfg.get("tokenizer"),
             max_len=int(tool_data_cfg.get("max_len", 256)),

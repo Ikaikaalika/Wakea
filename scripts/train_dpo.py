@@ -11,12 +11,12 @@ try:
 except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
-from ..utils.logging import setup_logging
-from ..utils.config import load_yaml
-from ..utils.seed import seed_everything
-from ..utils.checkpoint import save_checkpoint
-from ..data.datasets import PreferenceDataset, PrefCollator
-from ..modeling.wakea_lm import build_model_from_cfg
+from utils.logging import setup_logging
+from utils.config import load_yaml
+from utils.seed import seed_everything
+from utils.checkpoint import save_checkpoint
+from data.datasets import PreferenceDataset, PrefCollator
+from modeling.wakea_lm import build_model_from_cfg
 
 
 def main(argv=None):
@@ -37,7 +37,7 @@ def main(argv=None):
 
     data_cfg = cfg.get("data", {})
     dset = PreferenceDataset(
-        path=data_cfg.get("path", "wakea/data/schemas/pref_pairs.jsonl"),
+        path=data_cfg.get("path", "data/schemas/pref_pairs.jsonl"),
         tokenizer_name=data_cfg.get("tokenizer"),
         max_len=int(data_cfg.get("max_len", 256)),
     )

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..rag.retriever import InMemoryRetriever
+from rag.retriever import InMemoryRetriever
 
 
 def web_search(query: str, k: int = 3) -> str:

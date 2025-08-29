@@ -9,12 +9,12 @@ try:
 except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
-from ..rag.api import build_index_from_file, load_index
+from rag.api import build_index_from_file, load_index
 from .router import ToolRouter
-from ..modeling.tokenizer import get_text_tokenizer
-from ..modeling.wakea_lm import build_model_from_cfg
-from ..utils.checkpoint import load_checkpoint
-from ..utils.config import load_yaml
+from modeling.tokenizer import get_text_tokenizer
+from modeling.wakea_lm import build_model_from_cfg
+from utils.checkpoint import load_checkpoint
+from utils.config import load_yaml
 
 
 def parse_args(argv=None):

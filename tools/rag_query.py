@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
-from ..rag.retriever import InMemoryRetriever
-from ..rag.rerank import simple_rerank
+from rag.retriever import InMemoryRetriever
+from rag.rerank import simple_rerank
 
 
 def rag_answer(query: str, k: int = 3) -> str:
@@ -14,4 +14,3 @@ def rag_answer(query: str, k: int = 3) -> str:
     reranked = simple_rerank(query, docs)
     context = "\n".join([d.text for d in reranked])
     return f"[RAG] Context preview:\n{context[:500]}\nAnswer (draft): {query} — see citations above."
-

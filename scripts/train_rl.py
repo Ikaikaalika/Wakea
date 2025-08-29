@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import argparse
 
-from ..training.rfs_bridge import rfs_ppo_compat
-from ..utils.logging import setup_logging
-from ..utils.config import load_yaml
-from ..utils.seed import seed_everything
+from training.rfs_bridge import rfs_ppo_compat
+from utils.logging import setup_logging
+from utils.config import load_yaml
+from utils.seed import seed_everything
 
 
 def main(argv=None):
