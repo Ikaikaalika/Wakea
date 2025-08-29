@@ -1,0 +1,12 @@
+vision:
+  encoder: clip-vit-b16  # frozen, external
+  adapter: vision_mlp
+  d_in: 512
+  n_tokens: 32
+
+audio:
+  encoder: whisper-tiny  # optional, external
+  adapter: audio_proj
+  d_in: 384
+  stride: 2
+

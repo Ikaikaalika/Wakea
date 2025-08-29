@@ -1,0 +1,6 @@
+seed: 1337
+batch_size: 4
+lr: 1.0e-5
+max_steps: 10
+beta: 0.1
+

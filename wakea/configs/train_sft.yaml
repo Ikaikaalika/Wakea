@@ -1,0 +1,6 @@
+seed: 1337
+batch_size: 4
+lr: 3.0e-4
+max_steps: 10
+use_rfs: false
+

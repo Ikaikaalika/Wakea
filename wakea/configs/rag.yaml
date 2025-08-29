@@ -1,0 +1,10 @@
+index:
+  dim: 256
+  backend: in_memory
+
+retrieval:
+  top_k: 5
+
+rerank:
+  method: simple
+

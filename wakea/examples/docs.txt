@@ -1,0 +1,4 @@
+Wakea is a small multimodal reasoning model scaffold.
+It supports simple tool use and a toy RAG index.
+The repository is designed for research and rapid prototyping.
+

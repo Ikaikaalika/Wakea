@@ -1,0 +1,6 @@
+seed: 1337
+batch_size: 2
+rollout_steps: 32
+ppo_epochs: 1
+use_rfs_ppo: false
+
