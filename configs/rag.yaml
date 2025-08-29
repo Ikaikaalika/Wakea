@@ -1,10 +1,12 @@
 index:
   dim: 256
-  backend: in_memory
+  backend: faiss  # options: faiss, in_memory
+
+embed:
+  model: sentence-transformers/all-MiniLM-L6-v2
 
 retrieval:
   top_k: 5
 
 rerank:
   method: simple
-

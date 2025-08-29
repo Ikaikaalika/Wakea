@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import List
 
-from .retriever import InMemoryRetriever
+from .retriever import Retriever
 
 
 def ingest_texts(texts: List[str]) -> None:
-    r = InMemoryRetriever.get_global() or InMemoryRetriever()
+    r = Retriever.get_global() or Retriever()
     r.ingest(texts)
-    InMemoryRetriever.set_global(r)
-
+    Retriever.set_global(r)

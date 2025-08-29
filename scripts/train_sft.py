@@ -7,6 +7,7 @@ try:
     import torch
     from torch.utils.data import DataLoader
     import torch.optim as optim
+    from torch.cuda.amp import autocast, GradScaler
 except Exception as e:  # pragma: no cover
     torch = None  # type: ignore
 
@@ -79,29 +80,43 @@ def main(argv=None):
         tool_iter = None
 
     opt = optim.AdamW(model.parameters(), lr=float(cfg.get("lr", 3e-4)))
+    scaler = GradScaler(enabled=bool(cfg.get("use_amp", True)) and torch.cuda.is_available())
+    grad_clip = float(cfg.get("grad_clip", 1.0))
     max_steps = int(cfg.get("max_steps", 100))
     step = 0
     model.train()
     for batch in loader:
         input_ids = batch["input_ids"].to(device)
         labels = batch["labels"].to(device)
-        opt.zero_grad()
-        out = model(input_ids=input_ids, labels=labels)
-        loss = out.get("loss") if isinstance(out, dict) else None
-        if loss is None:
-            # backward-compatible path
-            _, loss = model(input_ids=input_ids, labels=labels)
-        # Optional tool training
-        if tool_iter is not None and tool_loss_weight > 0.0:
-            tb = next(tool_iter)
-            t_input = tb["input_ids"].to(device)
-            t_labels = tb["tool_labels"].to(device)
-            tout = model(input_ids=t_input, tool_labels=t_labels, tool_loss_weight=tool_loss_weight)
-            if isinstance(tout, dict) and "loss" in tout:
-                loss = (loss if loss is not None else 0.0) + tout["loss"]
+        opt.zero_grad(set_to_none=True)
+        use_amp = bool(cfg.get("use_amp", True)) and torch.cuda.is_available()
+        with autocast(enabled=use_amp):
+            out = model(input_ids=input_ids, labels=labels)
+            loss = out.get("loss") if isinstance(out, dict) else None
+            if loss is None:
+                # backward-compatible path
+                _, loss = model(input_ids=input_ids, labels=labels)
+            # Optional tool training
+            if tool_iter is not None and tool_loss_weight > 0.0:
+                tb = next(tool_iter)
+                t_input = tb["input_ids"].to(device)
+                t_labels = tb["tool_labels"].to(device)
+                tout = model(input_ids=t_input, tool_labels=t_labels, tool_loss_weight=tool_loss_weight)
+                if isinstance(tout, dict) and "loss" in tout:
+                    loss = (loss if loss is not None else 0.0) + tout["loss"]
         assert loss is not None
-        loss.backward()
-        opt.step()
+        if use_amp:
+            scaler.scale(loss).backward()
+            if grad_clip and grad_clip > 0:
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            scaler.step(opt)
+            scaler.update()
+        else:
+            loss.backward()
+            if grad_clip and grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            opt.step()
         if step % 10 == 0:
             log.info(f"step={step} loss={loss.item():.4f}")
         step += 1

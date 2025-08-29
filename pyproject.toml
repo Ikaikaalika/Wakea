@@ -11,11 +11,13 @@ dependencies = [
   # Optional at runtime; install manually as needed
   "torch>=2.1; platform_system != 'Darwin' or python_version >= '3.10'",
   "pyyaml>=6.0",
+  "requests>=2.31",
 ]
 
 [project.optional-dependencies]
 rag = [
   "faiss-cpu>=1.7.4; platform_machine != 'arm64'",
+  "sentence-transformers>=2.2",
 ]
 server = [
   "uvicorn>=0.23",

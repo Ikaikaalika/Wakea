@@ -28,6 +28,7 @@ def parse_args(argv=None):
     ap.add_argument("--tokenizer", type=str, help="HF tokenizer name (optional)", default=None)
     ap.add_argument("--temperature", type=float, default=0.0)
     ap.add_argument("--tools-cfg", type=str, help="Path to tools.yaml", default="configs/tools.yaml")
+    ap.add_argument("--rag-cfg", type=str, help="Path to rag.yaml", default="configs/rag.yaml")
     return ap.parse_args(argv)
 
 
@@ -64,10 +65,10 @@ def main(argv=None):
     model = None
     tok = None
     if args.load_index:
-        n = load_index(args.load_index)
+        n = load_index(args.load_index, cfg_path=args.rag_cfg)
         print(f"[wakea] Loaded {n} docs from {args.load_index}")
     if args.build_index:
-        n = build_index_from_file(args.build_index, out_path=args.save_index)
+        n = build_index_from_file(args.build_index, out_path=args.save_index, cfg_path=args.rag_cfg)
         print(f"[wakea] Indexed {n} lines from {args.build_index}")
     if args.ckpt and args.model_cfg:
         if torch is None:

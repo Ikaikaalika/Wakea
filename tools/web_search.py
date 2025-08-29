@@ -16,10 +16,12 @@ def web_search(query: str, k: int = 3, tools_cfg_path: str = "configs/tools.yaml
         cfg = load_yaml(tools_cfg_path)
     except Exception:
         cfg = {}
-    client = build_client_from_config(cfg)
+    web_cfg = cfg if isinstance(cfg, dict) else {}
+    client = build_client_from_config(web_cfg)
     if client is not None:
         try:
-            results = client.search(query, top_k=k)
+            topk = int(web_cfg.get("web_config", {}).get("top_k", k))
+            results = client.search(query, top_k=topk)
             lines = [f"- {r.get('title')}: {r.get('link')}" for r in results]
             return "[web_search]\n" + "\n".join(lines[:k])
         except Exception as e:  # pragma: no cover

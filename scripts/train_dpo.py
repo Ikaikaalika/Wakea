@@ -8,6 +8,7 @@ try:
     from torch.utils.data import DataLoader
     import torch.optim as optim
     import torch.nn.functional as F
+    from torch.cuda.amp import autocast, GradScaler
 except Exception:  # pragma: no cover
     torch = None  # type: ignore
 
@@ -50,6 +51,8 @@ def main(argv=None):
     opt = optim.AdamW(model.parameters(), lr=float(cfg.get("lr", 1e-5)))
     beta = float(cfg.get("beta", 0.1))
     max_steps = int(cfg.get("max_steps", 100))
+    scaler = GradScaler(enabled=True and torch.cuda.is_available())
+    grad_clip = float(cfg.get("grad_clip", 1.0))
     step = 0
     model.train()
 
@@ -58,24 +61,26 @@ def main(argv=None):
         chosen = batch["chosen"].to(device)
         rejected = batch["rejected"].to(device)
 
-        # Concatenate prompt + response for logprob calc
         def seq_logprob(seq):
             logits, _ = model(seq[:, :-1], labels=None)
             logp = F.log_softmax(logits, dim=-1)
             gather = logp.gather(-1, seq[:, 1:].unsqueeze(-1)).squeeze(-1)
-            # Mask padding
             mask = (seq[:, 1:] != dset.pad_id).float()
             return (gather * mask).sum(dim=-1)
 
-        prompt_chosen = torch.cat([prompt, chosen], dim=1)
-        prompt_rejected = torch.cat([prompt, rejected], dim=1)
-        logp_c = seq_logprob(prompt_chosen)
-        logp_r = seq_logprob(prompt_rejected)
-        # DPO objective (without reference): maximize sigmoid(beta*(logp_c - logp_r))
-        loss = -torch.log(torch.sigmoid(beta * (logp_c - logp_r))).mean()
-        opt.zero_grad()
-        loss.backward()
-        opt.step()
+        opt.zero_grad(set_to_none=True)
+        with autocast(enabled=torch.cuda.is_available()):
+            prompt_chosen = torch.cat([prompt, chosen], dim=1)
+            prompt_rejected = torch.cat([prompt, rejected], dim=1)
+            logp_c = seq_logprob(prompt_chosen)
+            logp_r = seq_logprob(prompt_rejected)
+            loss = -torch.log(torch.sigmoid(beta * (logp_c - logp_r))).mean()
+        scaler.scale(loss).backward()
+        if grad_clip and grad_clip > 0:
+            scaler.unscale_(opt)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+        scaler.step(opt)
+        scaler.update()
         if step % 10 == 0:
             log.info(f"step={step} loss={loss.item():.4f}")
         step += 1
