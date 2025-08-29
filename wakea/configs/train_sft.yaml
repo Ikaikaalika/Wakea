@@ -11,3 +11,9 @@ data:
 
 model_cfg: wakea/configs/model.yaml
 output_dir: checkpoints/sft
+tool_cfg: wakea/configs/tools.yaml
+tool_loss_weight: 0.2
+tool_data:
+  path: wakea/data/schemas/tool_use.jsonl
+  tokenizer: null
+  max_len: 256

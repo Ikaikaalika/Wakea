@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-def web_search(query: str) -> str:
-    """Placeholder web search tool.
+from ..rag.retriever import InMemoryRetriever
 
-    Network access is disabled in this scaffold. Replace with a real implementation
-    (e.g., local index or approved API) for experiments.
+
+def web_search(query: str, k: int = 3) -> str:
+    """Local web-search using the in-memory RAG index if available.
+
+    This avoids network calls and uses whatever corpus you indexed via build_index.
     """
-    return f"[web_search] Network-disabled stub. Query='{query}'"
-
+    r = InMemoryRetriever.get_global()
+    if not r:
+        return f"[web_search] No local index loaded. Query='{query}'"
+    docs = r.search(query, top_k=k)
+    results = "\n".join([f"- {d.text}" for d in docs])
+    return f"[web_search] Top results for '{query}':\n{results}"

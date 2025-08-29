@@ -130,3 +130,47 @@ class PrefCollator:
         rejected = pad_2d([b.rejected for b in batch], self.pad_id)
         return {"prompt": prompt, "chosen": chosen, "rejected": rejected}
 
+
+# Tool-use dataset for auxiliary tool selection training
+@dataclass
+class ToolExample:
+    input_ids: List[int]
+    label: int
+
+
+class ToolUseDataset(Dataset):  # type: ignore[misc]
+    def __init__(self, path: str, tool_names: List[str], tokenizer_name: str | None = None, max_len: int = 512):
+        self.samples: List[ToolExample] = []
+        self.tool_to_id = {t: i for i, t in enumerate(tool_names)}
+        tok = get_text_tokenizer(tokenizer_name)
+        rows = _read_jsonl(path)
+        for row in rows:
+            prompt = str(row["prompt"])  # user text
+            tool = str(row["tool"]).strip()
+            if tool not in self.tool_to_id:
+                # skip unknown tools to avoid label mismatch
+                continue
+            ids = tok.encode(prompt, add_special=True)[:max_len]
+            label = self.tool_to_id[tool]
+            self.samples.append(ToolExample(ids, label))
+        self.pad_id = tok.pad_id
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, idx: int) -> Tuple[List[int], int]:
+        ex = self.samples[idx]
+        return ex.input_ids, ex.label
+
+
+class ToolCollator:
+    def __init__(self, pad_id: int):
+        self.pad_id = pad_id
+
+    def __call__(self, batch: List[Tuple[List[int], int]]):
+        inputs, labels = zip(*batch)
+        input_ids = pad_2d(list(inputs), self.pad_id)
+        import torch as _torch
+
+        tool_labels = _torch.tensor(labels, dtype=_torch.long)
+        return {"input_ids": input_ids, "tool_labels": tool_labels}

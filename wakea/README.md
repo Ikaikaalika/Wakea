@@ -36,6 +36,12 @@ python -m wakea.scripts.build_index --docs wakea/examples/docs.txt --out checkpo
 python -m wakea.scripts.build_index --load checkpoints/rag.pkl
 ```
 
+5) Train tool-use head (web, rag, calculator, code)
+```
+python -m wakea.scripts.train_sft --config wakea/configs/train_sft.yaml
+# Config enables joint LM + tool classification via tool_data + tool_loss_weight
+```
+
 See configs under `wakea/configs/` and scripts under `wakea/scripts/`.
 
 ## Training Notes
